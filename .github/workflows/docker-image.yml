@@ -12,5 +12,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: GHCR login
+      env:
+        GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+        GHCR_PASSWORD: ${{ secrets.GHCR_PASSWORD }}
+      run: echo "${GHCR_PASSWORD}" | docker login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag oscar-metrics:$(date +%s)
+      run: |
+        GHCR_IMAGE=ghcr.io/grycap/oscar-metrics
+        
+        docker build . --file Dockerfile --output "type=image,push=true" --tag ${GHCR_IMAGE}:latest
