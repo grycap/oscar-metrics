@@ -7,7 +7,7 @@ import argparse
 from oscar_python.client import Client
 
 QUERY_ENDPOINT = "/api/v1/query?query="
-TIME = "30d"
+TIME = "5d"
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 

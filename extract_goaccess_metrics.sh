@@ -93,8 +93,8 @@ if [ ! -f "${FULL_REPORT_FILE}" ] || [ ! -s "${FULL_REPORT_FILE}" ]; then
     echo "Error: Failed to create html report."
     exit 1
 fi
-goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "metrics/index.html"
+goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "metrics/dashboard.html"
 
 # Upload metrics to s3
-aws s3 cp --recursive metrics/ s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"
+aws s3 cp --recursive metrics/ s3://metrics.oscar.grycap.net/"${CLUSTER_ID}/goaccess_csv"
 aws s3 cp --recursive "${METRICS_PATH}" s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/rawmetrics/
