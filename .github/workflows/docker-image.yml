@@ -2,7 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+    - main
+    - devel
 
 jobs:
 
@@ -20,5 +22,9 @@ jobs:
     - name: Build the Docker image
       run: |
         GHCR_IMAGE=ghcr.io/grycap/oscar-metrics
-        
-        docker build . --file Dockerfile --output "type=image,push=true" --tag ${GHCR_IMAGE}:latest
+        if [[ $GITHUB_REF == refs/heads/devel ]]; then
+          TAG="${GHCR_IMAGE}:devel"
+        else
+          TAG="${GHCR_IMAGE}:latest"
+        fi
+        docker build . --file Dockerfile --output "type=image,push=true" --tag ${TAG}
