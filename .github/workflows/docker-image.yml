@@ -25,6 +25,6 @@ jobs:
         if [[ $GITHUB_REF == refs/heads/devel ]]; then
           TAGS="--tag ${GHCR_IMAGE}:devel"
         else
-          TAGS="${GHCR_IMAGE}:latest"
+          TAGS="--tag ${GHCR_IMAGE}:latest"
         fi
         docker build . --file Dockerfile --output "type=image,push=true" "${TAGS}"
