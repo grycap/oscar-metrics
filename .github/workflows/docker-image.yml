@@ -27,4 +27,4 @@ jobs:
         else
           TAGS="${GHCR_IMAGE}:latest"
         fi
-        docker build . --file Dockerfile --output "type=image,push=true" ${TAGS}
+        docker build . --file Dockerfile --output "type=image,push=true" "${TAGS}"
