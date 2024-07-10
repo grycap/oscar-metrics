@@ -93,7 +93,7 @@ def generate_html(out_file, dir_path):
         f.write(html_content)
 
     print(f"HTML file '{out_file}' has been generated.")
-    
+    # Upload to s3
 
 
 
