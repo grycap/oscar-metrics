@@ -23,8 +23,8 @@ jobs:
       run: |
         GHCR_IMAGE=ghcr.io/grycap/oscar-metrics
         if [[ $GITHUB_REF == refs/heads/devel ]]; then
-          TAGS="--tag ${GHCR_IMAGE}:devel"
+          TAG="${GHCR_IMAGE}:devel"
         else
-          TAGS="--tag ${GHCR_IMAGE}:latest"
+          TAG="${GHCR_IMAGE}:latest"
         fi
-        docker build . --file Dockerfile --output "type=image,push=true" "${TAGS}"
+        docker build . --file Dockerfile --output "type=image,push=true" --tag ${TAG}
