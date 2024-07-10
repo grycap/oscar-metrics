@@ -17,19 +17,22 @@ jobs:
       env:
         GHCR_USERNAME: ${{ github.actor }}
         GHCR_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      run: echo "${GHCR_TOKEN}" | docker login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
+    - name: Set tag
+      id: settag
       run: |
-        echo "${GHCR_TOKEN}" | docker login ghcr.io --username "${GHCR_USERNAME}" --password-stdin
         GHCR_IMAGE=ghcr.io/grycap/oscar-metrics
         if [[ $GITHUB_REF == refs/heads/devel ]]; then
           TAG="${GHCR_IMAGE}:devel"
         else
           TAG="${GHCR_IMAGE}:latest"
         fi
+        echo ::set-output name=tag::${TAG}
     - name: Build the Docker image
       id: push
       uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
       with:
         context: .
         push: true
-        tags: "${TAG}"
+        tags: ${{ steps.settag.outputs.tag }}
 #docker build . --file Dockerfile --output "type=image,push=true" --tag ${TAG}
