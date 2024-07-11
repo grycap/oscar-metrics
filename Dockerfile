@@ -13,9 +13,15 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 # Verify the installation
 RUN aws --version
 
+# Install python dependencies
+COPY requirements.txt /tmp/
+RUN pip3 install -r /tmp/requirements.txt
+
 # Create the directory structure for the metrics
-RUN mkdir -p /app/goaccess_outputs/filtered_by_status_code && \
-    mkdir -p /app/metrics && \
+RUN mkdir -p /app/metrics/goaccess_outputs/filtered_by_status_code && \
+    mkdir -p /app/metrics/rawmetrics && \
+    mkdir -p /app/metrics/goaccess-metrics && \
+    mkdir -p /app/metrics/prometheus-metrics && \
     mkdir -p /var/log/ingresslogs
 
 # Copy required files
@@ -24,6 +30,8 @@ COPY goaccess_metric_parser.py /app/
 
 COPY extract_prometheus_metrics.sh /app/
 COPY metrics_prom.py /app/
+
+COPY create_index.py /app/
 
 COPY dbip-country-lite-2024.mmdb /app/
 COPY goaccess.conf /etc/goaccess/

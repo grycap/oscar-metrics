@@ -55,7 +55,7 @@ def query(cpu_usage_query):
     return json.loads(response.text)
     
 def generate_file_name():
-    return f"metrics/prometheus-metrics-{str(int(time.time()))}.csv"
+    return f"/app/metrics/prometheus-metrics/metric-{str(int(time.time()))}.csv"
 
 def extract_metrics(cluster_services):
     with open(generate_file_name(), 'w', newline='') as file:

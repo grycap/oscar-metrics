@@ -83,6 +83,8 @@ def generate_html(out_file, dir_path):
             else:
                 file_url = s3_path+file_name
             icon = get_icon(file_name)
+            if "dashboard" in file_name:
+                file_name = "GoAccess Dashboard"
             file_entry = html_file_entry_template.format(url=file_url, id=i, icon=icon, filename=file_name)
             html_content += file_entry
 
