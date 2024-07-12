@@ -66,7 +66,6 @@ def extract_metrics(cluster_services):
         for svc in cluster_services:
             svc_vo = svc["vo"]
             svc_name = svc["name"]
-            print("Service: ", svc_name)
             if svc_vo!="" and svc_vo == VO:
 
                 result = {}
@@ -88,7 +87,6 @@ def extract_metrics(cluster_services):
                     else:
                         cpu_usage_query = get_sync_query(svc_name)
                     result = query(cpu_usage_query)
-                    print(result)
                     metrics = result["data"]["result"]
                     if len(metrics) > 0:
                         for m in metrics:
@@ -98,7 +96,7 @@ def extract_metrics(cluster_services):
 
 ######## MAIN ##########                       
 if __name__ == "__main__":
-
+    print("[*] Getting metrics from Prometheus DB")
     try:
         oscar_client = Client(OSCAR_CLUSTER_AUTH)
     except:
