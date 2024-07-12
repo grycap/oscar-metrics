@@ -1,0 +1,3 @@
+liboidcagent
+requests
+oscar_python

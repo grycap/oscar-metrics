@@ -2,12 +2,12 @@ import os
 
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
-folder_path = '/home/calarcon/Documents/accounting_tools/s3_example_folders'
+folder_path = '/app/metrics'
 s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
+OUT_PATH="/app/ui/"
 INDEX="index.html"
-SUB_INDEX="_index.html"
 # HTML template parts
 
 html_header = f"""<!DOCTYPE html>
@@ -15,9 +15,7 @@ html_header = f"""<!DOCTYPE html>
     <head>
         <meta charset="utf-8">
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
-        <style>
-            
-        </style>
+        <link href="{assets_base_url}/css/style.css" rel="stylesheet">
         <link rel="shortcut icon" href="{assets_base_url}/images/logo.png" type="image/webp">
         <link rel="apple-touch-icon" sizes="180x180" href="{assets_base_url}/images/logo.png">
         <link rel="icon" href="{assets_base_url}/images/favicon.png" type="image/webp">
@@ -78,11 +76,13 @@ def generate_html(out_file, dir_path):
             #file_url = file_path.replace("\\", "/")
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
-                generate_html(relative_url, file_path)
+                generate_html(OUT_PATH+relative_url, file_path)
                 file_url = s3_path+relative_url
             else:
                 file_url = s3_path+file_name
             icon = get_icon(file_name)
+            if "dashboard" in file_name:
+                file_name = "GoAccess Dashboard"
             file_entry = html_file_entry_template.format(url=file_url, id=i, icon=icon, filename=file_name)
             html_content += file_entry
 
@@ -93,12 +93,12 @@ def generate_html(out_file, dir_path):
         f.write(html_content)
 
     print(f"HTML file '{out_file}' has been generated.")
-    
+    # Upload to s3
 
 
 
 def main():
-    generate_html(INDEX, folder_path)
+    generate_html(OUT_PATH+INDEX, folder_path)
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 # Container paths
-METRICS_PATH="/app/goaccess_outputs"
-FILTERED_PATH="$METRICS_PATH/filtered_by_status_code"
+OUTPUTS_PATH="/app/metrics/rawmetrics"
+FILTERED_PATH="$OUTPUTS_PATH/filtered_by_status_code"
 OUTPUT_FILE="output"
 
 # Path to the readonly volume with the cluster's ingress logs
@@ -34,11 +34,11 @@ metrics(){
 
     cat $OSCAR_LOGS_DIR/$oscar_logfile | tee -a $FULL_REPORT_FILE >/dev/null
 
-    geo_err=$( { cat "$OSCAR_LOGS_DIR/$oscar_logfile" | goaccess - --log-format="${LOG_FORMAT}" -o "${METRICS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" --json-pretty-print; } 2>&1 )
-    if [ ! -f "${METRICS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" ]; then
+    geo_err=$( { cat "$OSCAR_LOGS_DIR/$oscar_logfile" | goaccess - --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" --json-pretty-print; } 2>&1 )
+    if [ ! -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" ]; then
         echo "[*] Warning: Couldn't process file $oscar_logfile"
     else
-        python3 goaccess_metric_parser.py -f "${METRICS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" -g 0
+        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" -g 0
     fi
 
     status_codes=('200' '204' '404' '500')
@@ -93,8 +93,4 @@ if [ ! -f "${FULL_REPORT_FILE}" ] || [ ! -s "${FULL_REPORT_FILE}" ]; then
     echo "Error: Failed to create html report."
     exit 1
 fi
-goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "metrics/dashboard.html"
-
-# Upload metrics to s3
-aws s3 cp --recursive metrics/ s3://metrics.oscar.grycap.net/"${CLUSTER_ID}/goaccess_csv"
-aws s3 cp --recursive "${METRICS_PATH}" s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/rawmetrics/
+goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
