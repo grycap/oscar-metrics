@@ -22,7 +22,7 @@ RUN mkdir -p /app/metrics/goaccess_outputs/filtered_by_status_code && \
     mkdir -p /app/metrics/rawmetrics && \
     mkdir -p /app/metrics/goaccess-metrics && \
     mkdir -p /app/metrics/prometheus-metrics && \
-    mkdir -p /app/ui
+    mkdir -p /app/ui && \
     mkdir -p /var/log/ingresslogs
 
 # Copy required files
