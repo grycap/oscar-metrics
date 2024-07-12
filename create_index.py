@@ -2,7 +2,7 @@ import os
 
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
-folder_path = '/home/calarcon/Documents/accounting_tools/s3_example_folders'
+folder_path = '/app/metrics'
 s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
