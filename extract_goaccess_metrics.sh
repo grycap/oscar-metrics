@@ -1,5 +1,5 @@
 # Container paths
-OUTPUTS_PATH="/app/metrics/goaccess_outputs"
+OUTPUTS_PATH="/app/metrics/rawmetrics"
 FILTERED_PATH="$OUTPUTS_PATH/filtered_by_status_code"
 OUTPUT_FILE="output"
 

@@ -3,7 +3,7 @@ import os
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
 folder_path = '/app/metrics'
-s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/'
+s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/ui'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
 INDEX="index.html"
@@ -15,9 +15,7 @@ html_header = f"""<!DOCTYPE html>
     <head>
         <meta charset="utf-8">
         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
-        <style>
-            
-        </style>
+        <link href="{assets_base_url}/css/style.css" rel="stylesheet">
         <link rel="shortcut icon" href="{assets_base_url}/images/logo.png" type="image/webp">
         <link rel="apple-touch-icon" sizes="180x180" href="{assets_base_url}/images/logo.png">
         <link rel="icon" href="{assets_base_url}/images/favicon.png" type="image/webp">

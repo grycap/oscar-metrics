@@ -12,7 +12,7 @@ JOB_PATH = "/job"
 
 TIMESTAMP = str(int(time.time()))
 
-OUTPUT_PATH = "/app/metrics"
+OUTPUT_PATH = "/app/metrics/goaccess-metrics"
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-f", "--file_path", type=str, help="Logfile path/name")
