@@ -3,11 +3,11 @@ import os
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
 folder_path = '/app/metrics'
-s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/ui'
+s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
+OUT_PATH="/app/ui/"
 INDEX="index.html"
-SUB_INDEX="_index.html"
 # HTML template parts
 
 html_header = f"""<!DOCTYPE html>
@@ -76,7 +76,7 @@ def generate_html(out_file, dir_path):
             #file_url = file_path.replace("\\", "/")
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
-                generate_html(relative_url, file_path)
+                generate_html(OUT_PATH+relative_url, file_path)
                 file_url = s3_path+relative_url
             else:
                 file_url = s3_path+file_name
@@ -98,7 +98,7 @@ def generate_html(out_file, dir_path):
 
 
 def main():
-    generate_html(INDEX, folder_path)
+    generate_html(OUT_PATH+INDEX, folder_path)
 
 if __name__ == "__main__":
     main()
