@@ -71,14 +71,19 @@ def generate_html(out_file, dir_path, out_url):
     html_content = html_header
 
     for i, file_name in enumerate(os.listdir(dir_path)):
+        print(f"==== file: {file_name} ====")
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path) or os.path.isdir(file_path):
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
+                print("relative_url: ", relative_url)
+                print("out_url: ", out_url+file_name+"/")
+                print("file_url: ", s3_path+relative_url)
                 generate_html(OUT_PATH+relative_url, file_path, out_url+file_name+"/")
                 file_url = s3_path+relative_url
             else:
                 file_url = out_url+file_name
+                print("file_url: ", file_url)
             icon = get_icon(file_name)
             if "dashboard" in file_name:
                 file_name = "GoAccess Dashboard"
