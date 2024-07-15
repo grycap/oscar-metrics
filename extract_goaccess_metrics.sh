@@ -74,7 +74,7 @@ do
         do
             if [[ $logfile == *".gz" ]]; then
                 # upload a backup of the ingress logs to s3
-                aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs
+                aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
                 # unzip all log files
                 gzip -d $logfile
             fi
