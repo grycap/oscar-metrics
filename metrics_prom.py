@@ -1,13 +1,15 @@
-from datetime import date
 import time
 import requests
 import json
 import csv
 import argparse
+from datetime import datetime, timedelta
 from oscar_python.client import Client
 
 QUERY_ENDPOINT = "/api/v1/query?query="
 TIME = "30d"
+END_DATE = datetime.today()
+START_DATE = END_DATE - timedelta(days=30)
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -55,12 +57,12 @@ def query(cpu_usage_query):
     return json.loads(response.text)
     
 def generate_file_name():
-    return f"/app/metrics/prometheus-metrics/metric-{str(int(time.time()))}.csv"
+    return f"/app/metrics/prometheus-metrics/metric-{END_DATE}.csv"
 
 def extract_metrics(cluster_services):
     with open(generate_file_name(), 'w', newline='') as file:
         writer = csv.writer(file)
-        fields = ["service_name", "pod_name", "cpu_usage_seconds", "vo"]
+        fields = ["service_name", "pod_name", "cpu_usage_seconds", "vo", "start_date", "end_date"]
         writer.writerow(fields)
 
         for svc in cluster_services:
@@ -92,7 +94,7 @@ def extract_metrics(cluster_services):
                         for m in metrics:
                             #pod_name =  m["metric"]["pod"]
                             value = m["value"][1]
-                            writer.writerow([svc_name,svc_name, value, svc_vo])
+                            writer.writerow([svc_name,svc_name, value, svc_vo, START_DATE, END_DATE])
 
 ######## MAIN ##########                       
 if __name__ == "__main__":
