@@ -14,44 +14,27 @@ mkdir -p $OSCAR_LOGS_DIR
 # Log format for goaccess
 LOG_FORMAT='%^ %^ %^ %h - - [%d:%t] %~ %m %U %^ %s %^ %R %^ %^'
 
-metrics(){
-    oscar_logfile="oscar_execlog_"
+addLog(){
     ingress_logfile=$1
-    metric_date=$(echo $ingress_logfile | awk -F. '{print $3}')
+    cat $ingress_logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $FULL_REPORT_FILE >/dev/null
+}
 
-    if [ -z $metric_date ]; then
-        metric_date="current_"$(date +"%s")
-    fi
+metrics(){
 
-    # Filter the ingress logs to get the OSCAR ones
-    oscar_logfile=$oscar_logfile$metric_date.log
-    cat $ingress_logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' > $OSCAR_LOGS_DIR/$oscar_logfile
-    # Ensure the filtered log file is created and not empty 
-    if [ ! -f "$OSCAR_LOGS_DIR/$oscar_logfile" ] || [ ! -s "$OSCAR_LOGS_DIR/$oscar_logfile" ]; then
-        echo "[*] Warning: Failed to create log file or no OSCAR execution logs found for $OSCAR_LOGS_DIR/$oscar_logfile"
-        return
-    fi
-
-    cat $OSCAR_LOGS_DIR/$oscar_logfile | tee -a $FULL_REPORT_FILE >/dev/null
-
-    geo_err=$( { cat "$OSCAR_LOGS_DIR/$oscar_logfile" | goaccess - --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" --json-pretty-print; } 2>&1 )
-    if [ ! -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" ]; then
-        echo "[*] Warning: Couldn't process file $oscar_logfile"
-    else
-        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${oscar_logfile}.json" -g 0
-    fi
+    geo_err=$( {goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}.json" --json-pretty-print; } 2>&1 )
+    python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}.json" -g 0
 
     status_codes=('200' '204' '404' '500')
     init="t"
 
-    out="${FILTERED_PATH}/${OUTPUT_FILE}_${oscar_logfile}"
+    out="${FILTERED_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}"
 
     for code in "${status_codes[@]}"; do
-    code_logs=$(cat $OSCAR_LOGS_DIR/$oscar_logfile | grep -e 'HTTP/[0-9].[0-9]" '${code}' ')
+    code_logs=$(cat $FULL_REPORT_FILE| grep -e 'HTTP/[0-9].[0-9]" '${code}' ')
     if [ ! -z "$code_logs" ]; then
-        app_err=$( { cat $OSCAR_LOGS_DIR/$oscar_logfile | grep -e 'HTTP/[0-9].[0-9]" '${code}' ' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}" --enable-panel=REQUESTS --enable-panel=STATUS_CODES; } 2>&1 )
+        app_err=$( { cat $FULL_REPORT_FILE| grep -e 'HTTP/[0-9].[0-9]" '${code}' ' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}"; } 2>&1 )
         if [ ! -f "${out}_f${code}.json" ]; then
-            echo "[*] Warning: Couldn't process file $oscar_logfile for status code '$code'"
+            echo "[*] Warning: Couldn't process file $FULL_REPORT_FILE for status code '$code'"
         else
             if [ $init == 't' ]; then
                 python3 goaccess_metric_parser.py -f "${out}_f${code}.json" -p $code
@@ -86,7 +69,7 @@ done
 for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
 do
     if [[ $logfile == *".log"* ]]; then
-    metrics $logfile
+    addLog $logfile
     fi
 done
 
@@ -95,4 +78,5 @@ if [ ! -f "${FULL_REPORT_FILE}" ] || [ ! -s "${FULL_REPORT_FILE}" ]; then
     echo "Error: Failed to create html report."
     exit 1
 fi
+metrics
 goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
