@@ -35,7 +35,7 @@ with open(args.file_path, 'r') as rawfile:
 """
 def parse_geolocation_info():
 
-    with open(f'{OUTPUT_PATH}/{TIMESTAMP}_geolocation_metrics.csv', 'w', newline='') as gfile:
+    with open(f'{OUTPUT_PATH}/geolocation_metrics.csv', 'w', newline='') as gfile:
         writer = csv.writer(gfile)
         fields = ["continent", "country", "total_visits", "unique_visits", "start_metric_date", "end_metric_date"]
         writer.writerow(fields)
@@ -80,7 +80,7 @@ def parse_requests_info(status_code, write_type):
                 exec_count+=sum_requests
 
     if create_count != 0:
-        with open(f'{OUTPUT_PATH}/{TIMESTAMP}_created_apps_metrics.csv', write_type, newline='') as cfile:
+        with open(f'{OUTPUT_PATH}/created_apps_metrics.csv', write_type, newline='') as cfile:
             writer = csv.writer(cfile)
             if write_type == "w": writer.writerow(["application_count", "status_code", "start_metric_date", "end_metric_date"])
             writer.writerow([create_count, status_code, START_DATE, END_DATE])
@@ -88,14 +88,14 @@ def parse_requests_info(status_code, write_type):
             cfile.close()
 
     if exec_count != 0:
-       with open(f'{OUTPUT_PATH}/{TIMESTAMP}_total_inference_metrics.csv', write_type, newline='') as efile:
+       with open(f'{OUTPUT_PATH}/total_inference_metrics.csv', write_type, newline='') as efile:
             writer = csv.writer(efile)
             if write_type == "w": writer.writerow(["inference_count", "status_code", "start_metric_date", "end_metric_date"])
             writer.writerow([exec_count, status_code, START_DATE, END_DATE])
             
             efile.close()
 
-       with open(f'{OUTPUT_PATH}/{TIMESTAMP}_services_inference_metrics.csv', write_type, newline='') as sfile:
+       with open(f'{OUTPUT_PATH}/services_inference_metrics.csv', write_type, newline='') as sfile:
             writer = csv.writer(sfile)
             if write_type == "w": writer.writerow(["service_name", "exec_type", "status_code", "inference_count" , "start_metric_date", "end_metric_date"])
             for k in inference.keys():
