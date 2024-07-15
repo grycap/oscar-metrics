@@ -3,7 +3,7 @@ import os
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
 folder_path = '/app/metrics'
-s3_path=f'https://metrics.oscar.grycap.net/{cluster_id}/'
+s3_path=f'https://oscar-metrics.grycap.net/{cluster_id}/'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
 OUT_PATH="/app/ui/"
