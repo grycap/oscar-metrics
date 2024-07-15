@@ -3,7 +3,6 @@ import os
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
 folder_path = '/app/metrics'
-s3_path=f'https://oscar-metrics.grycap.net/{cluster_id}/'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
 OUT_PATH="/app/ui/"
@@ -66,7 +65,7 @@ def get_icon(file_name):
     else:
         return f"{assets_base_url}/images/file.png"
 
-def generate_html(out_file, dir_path, out_url):
+def generate_html(out_file, dir_path, out_url=''):
     # Generate HTML content
     html_content = html_header
 
@@ -75,8 +74,8 @@ def generate_html(out_file, dir_path, out_url):
         if os.path.isfile(file_path) or os.path.isdir(file_path):
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
-                generate_html(OUT_PATH+relative_url, file_path, out_url+file_name+"/")
-                file_url = s3_path+relative_url
+                generate_html(OUT_PATH+relative_url, file_path, file_name+"/")
+                file_url = relative_url
             else:
                 file_url = out_url+file_name
             icon = get_icon(file_name)
@@ -101,7 +100,7 @@ def generate_html(out_file, dir_path, out_url):
 
 
 def main():
-    generate_html(OUT_PATH+INDEX, folder_path, s3_path)
+    generate_html(OUT_PATH+INDEX, folder_path)
 
 if __name__ == "__main__":
     main()
