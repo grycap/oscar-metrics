@@ -74,7 +74,7 @@ def generate_html(out_file, dir_path, out_url=''):
         if os.path.isfile(file_path) or os.path.isdir(file_path):
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
-                generate_html(OUT_PATH+relative_url, file_path, file_name+"/")
+                generate_html(OUT_PATH+relative_url, file_path, out_url+file_name+"/")
                 file_url = relative_url
             else:
                 file_url = out_url+file_name
