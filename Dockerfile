@@ -18,8 +18,7 @@ COPY requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
 # Create the directory structure for the metrics
-RUN mkdir -p /app/metrics/goaccess_outputs/filtered_by_status_code && \
-    mkdir -p /app/metrics/rawmetrics && \
+RUN mkdir -p /app/metrics/rawmetrics/filtered_by_status_code && \
     mkdir -p /app/metrics/goaccess-metrics && \
     mkdir -p /app/metrics/prometheus-metrics && \
     mkdir -p /app/ui && \

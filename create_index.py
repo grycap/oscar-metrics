@@ -73,12 +73,6 @@ def generate_html(out_file, dir_path, out_url):
     for i, file_name in enumerate(os.listdir(dir_path)):
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path) or os.path.isdir(file_path):
-            if "dashboard" in file_name:
-                file_name = "GoAccess Dashboard"
-            if "goaccess-metrics" in file_name:
-                file_name = "GoAccess Metrics"
-            if "prometheuds-metrics" in file_name:
-                file_name = "Prometheus Metrics" 
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
                 generate_html(OUT_PATH+relative_url, file_path, out_url+file_name+"/")
@@ -86,7 +80,12 @@ def generate_html(out_file, dir_path, out_url):
             else:
                 file_url = out_url+file_name
             icon = get_icon(file_name)
-               
+            if "dashboard" in file_name:
+                file_name = "GoAccess Dashboard"
+            if "goaccess-metrics" in file_name:
+                file_name = "GoAccess Metrics"
+            if "prometheuds-metrics" in file_name:
+                file_name = "Prometheus Metrics" 
             file_entry = html_file_entry_template.format(url=file_url, id=i, icon=icon, filename=file_name)
             html_content += file_entry
 
