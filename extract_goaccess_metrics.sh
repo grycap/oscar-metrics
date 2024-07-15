@@ -21,7 +21,7 @@ addLog(){
 
 metrics(){
 
-    geo_err=$( {goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}.json" --json-pretty-print; } 2>&1 )
+    geo_err=$( { goaccess "${FULL_REPORT_FILE}" --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}.json" --json-pretty-print; } 2>&1 )
     python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${OUTPUT_FILE}_${FULL_REPORT_FILE}.json" -g 0
 
     status_codes=('200' '204' '404' '500')
@@ -32,7 +32,7 @@ metrics(){
     for code in "${status_codes[@]}"; do
     code_logs=$(cat $FULL_REPORT_FILE| grep -e 'HTTP/[0-9].[0-9]" '${code}' ')
     if [ ! -z "$code_logs" ]; then
-        app_err=$( { cat $FULL_REPORT_FILE| grep -e 'HTTP/[0-9].[0-9]" '${code}' ' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}"; } 2>&1 )
+        app_err=$( { cat $FULL_REPORT_FILE | grep -e 'HTTP/[0-9].[0-9]" '${code}' ' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}"; } 2>&1 )
         if [ ! -f "${out}_f${code}.json" ]; then
             echo "[*] Warning: Couldn't process file $FULL_REPORT_FILE for status code '$code'"
         else
