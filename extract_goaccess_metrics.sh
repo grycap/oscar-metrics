@@ -12,7 +12,7 @@ FULL_REPORT_FILE="$OSCAR_LOGS_DIR/oscar.log"
 mkdir -p $OSCAR_LOGS_DIR
 
 # Log format for goaccess
-LOG_FORMAT='%^ %^ %^ %h - - [%d:%t] %~ %m %U %^ %s %b %R %u %^'
+LOG_FORMAT='%^ %^ %^ %h - - [%d:%t] %~ %m %U %^ %s %^ %R %^ %^'
 
 metrics(){
     oscar_logfile="oscar_execlog_"
