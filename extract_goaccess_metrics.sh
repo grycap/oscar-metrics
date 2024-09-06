@@ -67,7 +67,7 @@ done
 
 for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
 do
-    if [[ $logfile == *".log"* ]]; then
+    if [[ $logfile == *".log"* && $logfile != *".log" ]]; then
     addLog $logfile
     fi
 done
