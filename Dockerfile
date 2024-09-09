@@ -18,7 +18,7 @@ RUN wget https://tar.goaccess.io/goaccess-1.5.5.tar.gz && \
     cd goaccess-1.5.5/ && \
     ./configure --enable-utf8 && \ 
     make && \
-    make install && \
+    make install
 
 # Install python dependencies
 COPY requirements.txt /tmp/
