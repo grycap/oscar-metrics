@@ -2,7 +2,7 @@ FROM bitnami/python
 
 # Install goaccess tool
 RUN apt-get update && \
-    apt-get install vim -y
+    apt-get install vim libncursesw5-dev -y
 
 # Install aws-cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
@@ -13,7 +13,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 # Verify the installation
 RUN aws --version
 
-RUN wget https://tar.goaccess.io/goaccess-1.5.5.tar.gz && \
+RUN curl "https://tar.goaccess.io/goaccess-1.5.5.tar.gz" -o "goaccess-1.5.5.tar.gz" && \
     tar -xzvf goaccess-1.5.5.tar.gz && \
     cd goaccess-1.5.5/ && \
     ./configure --enable-utf8 && \ 
