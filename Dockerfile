@@ -13,12 +13,12 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 # Verify the installation
 RUN aws --version
 
-RUN wget https://tar.goaccess.io/goaccess-1.5.5.tar.gz \
-    tar -xzvf goaccess-1.5.5.tar.gz
-    cd goaccess-1.5.5/
-    ./configure --enable-utf8 
-    make
-    make install
+RUN wget https://tar.goaccess.io/goaccess-1.5.5.tar.gz && \
+    tar -xzvf goaccess-1.5.5.tar.gz && \
+    cd goaccess-1.5.5/ && \
+    ./configure --enable-utf8 && \ 
+    make && \
+    make install && \
 
 # Install python dependencies
 COPY requirements.txt /tmp/
