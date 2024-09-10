@@ -39,9 +39,9 @@ with open(args.file_path, 'r') as rawfile:
  > Countries reached 
  > Output format: {continent, country, total_visits, unique_visits, start_date, end_date}
 """
-def parse_geolocation_info():
+def parse_geolocation_info(write_type):
 
-    with open(f'{OUTPUT_PATH}/geolocation_metrics.csv', 'w', newline='') as gfile:
+    with open(f'{OUTPUT_PATH}/geolocation_metrics.csv', write_type, newline='') as gfile:
         writer = csv.writer(gfile)
         fields = ["continent", "country", "total_visits", "unique_visits", "start_metric_date", "end_metric_date"]
         writer.writerow(fields)
@@ -111,13 +111,14 @@ def parse_requests_info(status_code, write_type):
             sfile.close()        
 
 
+wr="w"
+if args.use_existing:
+    wr="a"
+
 if args.general:
-    parse_geolocation_info()
-elif args.partial:
-    if args.use_existing:
-        parse_requests_info(args.status_code, "a")
-    else:
-        parse_requests_info(args.status_code, "w")
+    parse_geolocation_info(wr)
+if args.partial:
+    parse_requests_info(args.status_code, wr)
 
 
 

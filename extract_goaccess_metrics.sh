@@ -23,7 +23,10 @@ metrics(){
     LOG_FILE=$1
     filename=`basename "$LOG_FILE"`
     geo_err=$( { goaccess "${LOG_FILE}" --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${filename}_full.json" --json-pretty-print; } 2>&1 )
-    python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0
+    if [[ $filename == "latest"* ]]; then
+        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0
+    else
+        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0 -u
 
     status_codes=('200' '204' '404' '500')
     init="t"
@@ -70,7 +73,7 @@ done
 for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
 do
     if [[ $logfile == *".log"* ]]; then
-        if [[ $logfile == *".log"]]; then
+        if [[ $logfile == *".log" ]]; then
             cat $logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
             metrics $LATEST_LOGS
         else
