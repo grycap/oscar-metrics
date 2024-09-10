@@ -27,7 +27,8 @@ metrics(){
         python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0
     else
         python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0 -u
-
+    fi
+    
     status_codes=('200' '204' '404' '500')
     init="t"
 
