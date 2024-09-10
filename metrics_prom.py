@@ -7,9 +7,9 @@ from datetime import datetime, timedelta
 from oscar_python.client import Client
 
 QUERY_ENDPOINT = "/api/v1/query?query="
-TIME = "30d"
+TIME = "5d"
 END_DATE = datetime.today()
-START_DATE = END_DATE - timedelta(days=30)
+START_DATE = END_DATE - timedelta(days=5)
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 

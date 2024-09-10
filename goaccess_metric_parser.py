@@ -27,8 +27,13 @@ args = parser.parse_args()
 
 with open(args.file_path, 'r') as rawfile:
     metrics = json.loads(rawfile.read())
-    START_DATE = metrics["general"]["start_date"]
-    END_DATE = metrics["general"]["end_date"]
+    try:
+        START_DATE = metrics["general"]["start_date"]
+        END_DATE = metrics["general"]["end_date"]
+    except:
+        START_DATE = metrics["general"]["date_time"]
+        END_DATE = metrics["general"]["date_time"]
+
 
 """
  > Countries reached 
