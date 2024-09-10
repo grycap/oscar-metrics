@@ -12,8 +12,7 @@ JOB_PATH = "/job"
 
 TIMESTAMP = str(int(time.time()))
 
-#OUTPUT_PATH = "/app/metrics/goaccess-metrics"
-OUTPUT_PATH = "/home/calarcon/Documents/accounting_tools/ingress_logs/controller"
+OUTPUT_PATH = "/app/metrics/goaccess-metrics"
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-f", "--file_path", type=str, help="Logfile path/name")
@@ -115,12 +114,8 @@ if args.use_existing:
     wr="a"
 
 if args.general:
-    print(">>> ", args.file_path)
-    print(">>> ", wr)
     parse_geolocation_info(wr)
 if args.partial:
-    print(">>> ", args.file_path)
-    print(">>> ", wr)
     parse_requests_info(args.status_code, wr)
 
 
