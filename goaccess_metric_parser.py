@@ -117,10 +117,3 @@ if args.general:
     parse_geolocation_info(wr)
 if args.partial:
     parse_requests_info(args.status_code, wr)
-
-
-
-
-
-
-
