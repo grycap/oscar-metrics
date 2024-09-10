@@ -2,7 +2,7 @@ FROM bitnami/python
 
 # Install goaccess tool
 RUN apt-get update && \
-    apt-get install vim libncursesw5-dev -y
+    apt-get install vim libncursesw5-dev libmaxminddb-dev -y
 
 # Install aws-cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
@@ -16,7 +16,7 @@ RUN aws --version
 RUN curl "https://tar.goaccess.io/goaccess-1.5.5.tar.gz" -o "goaccess-1.5.5.tar.gz" && \
     tar -xzvf goaccess-1.5.5.tar.gz && \
     cd goaccess-1.5.5/ && \
-    ./configure --enable-utf8 && \ 
+    ./configure --enable-utf8 --enable-geoip=mmdb --with-openssl && \ 
     make && \
     make install
 
@@ -41,4 +41,4 @@ COPY metrics_prom.py /app/
 COPY create_index.py /app/
 
 COPY dbip-country-lite-2024.mmdb /app/
-COPY goaccess.conf /etc/goaccess/ 
+COPY goaccess.conf /usr/local/etc/goaccess/goaccess.conf 
