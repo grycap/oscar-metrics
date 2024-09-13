@@ -82,7 +82,7 @@ def extract_metrics(cluster_services):
                                 pod_name = m["metric"]["pod"]
                                 if k in pod_name:
                                     value = m["value"][1]
-                                    writer.writerow([svc_name,pod_name, value, svc_vo])
+                                    writer.writerow([svc_name,pod_name, value, svc_vo, START_DATE, END_DATE])
                 else:
                     if "expose" in svc_name:
                         cpu_usage_query = get_exposed_query(svc_name)
