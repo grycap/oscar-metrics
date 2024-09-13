@@ -32,7 +32,7 @@ html_header = f"""<!DOCTYPE html>
             <div class="mt-48 page-full-wrap relative ">
                 <input type="hidden" value="creator-page" id="page-type">
                 <img class="display-image m-auto" data-src="{assets_base_url}/images/logo.png" src="{assets_base_url}/images/logo.png" alt="OSCAR metrics"/>
-                <h2 class="page-title page-text-color page-text-font mt-24 text-center text-fs-18">OSCAR-ai4eosc metrics index</h2>
+                <h2 class="page-title page-text-color page-text-font mt-24 text-center text-fs-18">OSCAR-{cluster_id}" metrics index</h2>
                        
                 <div class="mt-24">
 """

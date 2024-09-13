@@ -7,7 +7,7 @@ CLUSTER_LOGS_DIR="/var/log/clusterlogs"
 LOCAL_LOGS_DIR="/var/log/ingresslogs"
 OSCAR_LOGS_DIR="$LOCAL_LOGS_DIR/oscar"
 
-FULL_LOGS="$OSCAR_LOGS_DIR/oscar.log"
+HISTORY_LOGS="$OSCAR_LOGS_DIR/oscar.log"
 LATEST_LOGS="$OSCAR_LOGS_DIR/latest_oscar.log"
 mkdir -p $OSCAR_LOGS_DIR
 
@@ -16,7 +16,7 @@ LOG_FORMAT='%^ %^ %^ %h - - [%d:%t] %~ %m %U %^ %s %^ %R %^ %^'
 
 addLog(){
     ingress_logfile=$1
-    cat $ingress_logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $FULL_LOGS >/dev/null
+    cat $ingress_logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
 }
 
 metrics(){
@@ -75,6 +75,7 @@ for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
+            aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
             cat $logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
             metrics $LATEST_LOGS
         else
@@ -84,12 +85,11 @@ do
 done
 
 # Generate the html file
-if [ ! -f "${FULL_LOGS}" ] || [ ! -s "${FULL_LOGS}" ]; then
-    echo "Error: Failed to create html report."
-    exit 1
+if [ ! -f "${HISTORY_LOGS}" ] || [ ! -s "${HISTORY_LOGS}" ]; then
+    goaccess "${LATEST_LOGS}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
+else
+    metrics $HISTORY_LOGS
+
+    cat $LATEST_LOGS | tee -a $HISTORY_LOGS >/dev/null
+    goaccess "${HISTORY_LOGS}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
 fi
-
-metrics $FULL_LOGS
-
-cat $LATEST_LOGS | tee -a $FULL_LOGS >/dev/null
-goaccess "${FULL_LOGS}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
