@@ -3,7 +3,6 @@ import os
 cluster_id = os.getenv("CLUSTER_ID")
 # Configuration
 folder_path = '/app/metrics'
-s3_path=f'https://s3.amazonaws.com/metrics.oscar.grycap.net/{cluster_id}/'
 assets_base_url = 'https://s3.amazonaws.com/metrics.oscar.grycap.net/assets'  # Local path to assets
 
 OUT_PATH="/app/ui/"
@@ -33,7 +32,7 @@ html_header = f"""<!DOCTYPE html>
             <div class="mt-48 page-full-wrap relative ">
                 <input type="hidden" value="creator-page" id="page-type">
                 <img class="display-image m-auto" data-src="{assets_base_url}/images/logo.png" src="{assets_base_url}/images/logo.png" alt="OSCAR metrics"/>
-                <h2 class="page-title page-text-color page-text-font mt-24 text-center text-fs-18">OSCAR-ai4eosc metrics index</h2>
+                <h2 class="page-title page-text-color page-text-font mt-24 text-center text-fs-18">{cluster_id} metrics index"</h2>
                        
                 <div class="mt-24">
 """
@@ -66,23 +65,26 @@ def get_icon(file_name):
     else:
         return f"{assets_base_url}/images/file.png"
 
-def generate_html(out_file, dir_path):
+def generate_html(out_file, dir_path, out_url=''):
     # Generate HTML content
     html_content = html_header
 
     for i, file_name in enumerate(os.listdir(dir_path)):
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path) or os.path.isdir(file_path):
-            #file_url = file_path.replace("\\", "/")
             if os.path.isdir(file_path):
                 relative_url=file_name+".html"
-                generate_html(OUT_PATH+relative_url, file_path)
-                file_url = s3_path+relative_url
+                generate_html(OUT_PATH+relative_url, file_path, out_url+file_name+"/")
+                file_url = relative_url
             else:
-                file_url = s3_path+file_name
+                file_url = out_url+file_name
             icon = get_icon(file_name)
             if "dashboard" in file_name:
                 file_name = "GoAccess Dashboard"
+            if "goaccess-metrics" in file_name:
+                file_name = "GoAccess Metrics"
+            if "prometheus-metrics" in file_name:
+                file_name = "Prometheus Metrics" 
             file_entry = html_file_entry_template.format(url=file_url, id=i, icon=icon, filename=file_name)
             html_content += file_entry
 
