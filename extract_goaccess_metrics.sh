@@ -16,7 +16,7 @@ LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Tms | %h | %m %~ %U | %u'
 
 addLog(){
     ingress_logfile=$1
-    cat $ingress_logfile | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
+    cat $ingress_logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
 }
 
 metrics(){
@@ -76,7 +76,7 @@ do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
             aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
-            cat $logfile | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
+            cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
             metrics $LATEST_LOGS
         else
             addLog $logfile
