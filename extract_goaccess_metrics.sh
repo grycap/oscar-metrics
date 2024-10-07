@@ -12,7 +12,7 @@ LATEST_LOGS="$OSCAR_LOGS_DIR/latest_oscar.log"
 mkdir -p $OSCAR_LOGS_DIR
 
 # Log format for goaccess
-LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Tms | %h | %m %~ %U | %u'
+LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Ts | %h | %m %~ %U | %u'
 
 addLog(){
     ingress_logfile=$1
