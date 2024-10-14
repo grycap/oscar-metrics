@@ -71,7 +71,7 @@ do
     fi
 done
 
-for logfile in "$LOCAL_LOGS_DIR/$log/oscar/"*;
+for logfile in "$LOCAL_LOGS_DIR/$log_path/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
