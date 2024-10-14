@@ -56,13 +56,13 @@ for log in "$CLUSTER_LOGS_DIR"/*;
 do
     if [[ $log == *"oscar_oscar"* ]]; then
         cp -r $log $LOCAL_LOGS_DIR
+        # upload a backup of the logs to s3
+        aws s3 cp --recursive $log s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
         # remove total path
         log=$(echo $log | sed 's/\/var\/log\/clusterlogs\///')
         for logfile in "$LOCAL_LOGS_DIR/$log/oscar/"*;
         do
             if [[ $logfile == *".gz" ]]; then
-                # upload a backup of the ingress logs to s3
-                aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
                 # unzip all log files
                 gzip -d $logfile
             fi
@@ -75,7 +75,6 @@ for logfile in "$LOCAL_LOGS_DIR/$log/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
-            aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
             cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
             metrics $LATEST_LOGS
         else
