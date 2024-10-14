@@ -52,15 +52,15 @@ metrics(){
     done
 }
 
-for log in "$CLUSTER_LOGS_DIR"/*;
+for log_path in "$CLUSTER_LOGS_DIR"/*;
 do
-    if [[ $log == *"oscar_oscar"* ]]; then
-        cp -r $log $LOCAL_LOGS_DIR
-        # upload a backup of the logs to s3
-        aws s3 cp --recursive $log s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
+    if [[ $log_path == *"oscar_oscar"* ]]; then
+        cp -r $log_path $LOCAL_LOGS_DIR
         # remove total path
-        log=$(echo $log | sed 's/\/var\/log\/clusterlogs\///')
-        for logfile in "$LOCAL_LOGS_DIR/$log/oscar/"*;
+        log_relative_path=$(echo $log | sed 's/\/var\/log\/clusterlogs\///')
+        # upload a backup of the logs to s3
+        aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${log_relative_path}"
+        for logfile in "$LOCAL_LOGS_DIR/$log_relative_path/oscar/"*;
         do
             if [[ $logfile == *".gz" ]]; then
                 # unzip all log files
