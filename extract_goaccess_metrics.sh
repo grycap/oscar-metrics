@@ -71,7 +71,8 @@ do
     fi
 done
 
-for logfile in "$LOCAL_LOGS_DIR/$log_path/oscar/"*;
+# /var/log/ingresslogs/oscar_oscar-7499cd/oscar
+for logfile in "$LOCAL_LOGS_DIR/$relative_log_path/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
