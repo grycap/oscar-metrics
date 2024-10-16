@@ -57,7 +57,7 @@ do
     if [[ $log_path == *"oscar_oscar"* ]]; then
         cp -r $log_path $LOCAL_LOGS_DIR
         # remove total path
-        log_relative_path=$(echo $log_path | sed 's/\/var\/log\/clusterlogs\///')
+        relative_log_path=$(echo $log_path | sed 's/\/var\/log\/clusterlogs\///')
         # upload a backup of the logs to s3
         aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${log_relative_path}"
         for logfile in "$LOCAL_LOGS_DIR/$log_relative_path/oscar/"*;
