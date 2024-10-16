@@ -26,6 +26,22 @@ parser.add_argument("status_code", type=int, help="Complete logfile")
 
 args = parser.parse_args()
 
+wr="w"
+if args.use_existing:
+    wr="a"
+
+if args.create:
+    parse_create_info(wr)
+else:
+    with open(args.file_path, 'r') as rawfile:
+        metrics = json.loads(rawfile.read())
+        try:
+            START_DATE = metrics["general"]["start_date"]
+            END_DATE = metrics["general"]["end_date"]
+        except:
+            START_DATE = metrics["general"]["date_time"]
+            END_DATE = metrics["general"]["date_time"]
+
 """
  > Countries reached 
  > Output format: {continent, country, total_visits, unique_visits, start_date, end_date}
@@ -102,22 +118,6 @@ def parse_create_info(write_type):
                 writer.writerow([service_name, owner_uid, creation_time])
                 cfile.close()
         rawfile.close()
-
-wr="w"
-if args.use_existing:
-    wr="a"
-
-if args.create:
-    parse_create_info(wr)
-else:
-    with open(args.file_path, 'r') as rawfile:
-        metrics = json.loads(rawfile.read())
-        try:
-            START_DATE = metrics["general"]["start_date"]
-            END_DATE = metrics["general"]["end_date"]
-        except:
-            START_DATE = metrics["general"]["date_time"]
-            END_DATE = metrics["general"]["date_time"]
 
 if args.general:
     parse_geolocation_info(wr)
