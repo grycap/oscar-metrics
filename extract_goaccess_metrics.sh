@@ -12,11 +12,11 @@ LATEST_LOGS="$OSCAR_LOGS_DIR/latest_oscar.log"
 mkdir -p $OSCAR_LOGS_DIR
 
 # Log format for goaccess
-LOG_FORMAT='%^ %^ %^ %h - - [%d:%t] %~ %m %U %^ %s %^ %R %^ %^'
+LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Ts | %h | %m %~ %U | %u'
 
 addLog(){
     ingress_logfile=$1
-    cat $ingress_logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
+    cat $ingress_logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
 }
 
 metrics(){
@@ -52,17 +52,17 @@ metrics(){
     done
 }
 
-for log in "$CLUSTER_LOGS_DIR"/*;
+for log_path in "$CLUSTER_LOGS_DIR"/*;
 do
-    if [[ $log == *"ingress"* ]]; then
-        cp -r $log $LOCAL_LOGS_DIR
+    if [[ $log_path == *"oscar_oscar"* ]]; then
+        cp -r $log_path $LOCAL_LOGS_DIR
         # remove total path
-        log=$(echo $log | sed 's/\/var\/log\/clusterlogs\///')
-        for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
+        relative_log_path=$(echo $log_path | sed 's/\/var\/log\/clusterlogs\///')
+        # upload a backup of the logs to s3
+        aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${log_relative_path}"
+        for logfile in "$LOCAL_LOGS_DIR/$log_relative_path/oscar/"*;
         do
             if [[ $logfile == *".gz" ]]; then
-                # upload a backup of the ingress logs to s3
-                aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
                 # unzip all log files
                 gzip -d $logfile
             fi
@@ -71,12 +71,12 @@ do
     fi
 done
 
-for logfile in "$LOCAL_LOGS_DIR/$log/controller/"*;
+# /var/log/ingresslogs/oscar_oscar-7499cd/oscar
+for logfile in "$LOCAL_LOGS_DIR/$relative_log_path/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
-            aws s3 cp $logfile s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/
-            cat $logfile | grep -a 'oscar-oscar' | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
+            cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
             metrics $LATEST_LOGS
         else
             addLog $logfile
