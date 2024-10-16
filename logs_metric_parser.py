@@ -14,7 +14,6 @@ JOB_PATH = "/job"
 TIMESTAMP = str(int(time.time()))
 
 OUTPUT_PATH = "/app/metrics/goaccess-metrics"
-CREATE_LOGS_RE = "r'\[CREATE-HANDLER\] (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) (\w+) \| (\d{3}) \| (\/\S+) \| ([\w-]+) \| ([\w\d]+@[a-zA-Z]+\.[a-zA-Z]+)'"
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-f", "--file_path", type=str, help="Logfile path/name")
@@ -26,27 +25,6 @@ parser.add_argument("status_code", type=int, help="Complete logfile")
 
 
 args = parser.parse_args()
-
-wr="w"
-if args.use_existing:
-    wr="a"
-
-if args.create:
-    parse_create_info(wr)
-else:
-    with open(args.file_path, 'r') as rawfile:
-        metrics = json.loads(rawfile.read())
-        try:
-            START_DATE = metrics["general"]["start_date"]
-            END_DATE = metrics["general"]["end_date"]
-        except:
-            START_DATE = metrics["general"]["date_time"]
-            END_DATE = metrics["general"]["date_time"]
-
-if args.general:
-    parse_geolocation_info(wr)
-if args.partial:
-    parse_inference_info(args.status_code, wr)
 
 """
  > Countries reached 
@@ -79,15 +57,12 @@ def parse_inference_info(status_code, write_type):
 
     inference = dict()
     requests = metrics["requests"]["data"]
-    create_count = 0
     exec_count = 0
     
     for r in requests:
         if r["method"] == "POST":
             path = r["data"]
-            if path == CREATE_PATH:
-                create_count+=1
-            elif RUN_PATH in path or JOB_PATH in path:
+            if RUN_PATH in path or JOB_PATH in path:
                 sum_requests = r["hits"]["count"]
                 split_path = split(path)
                 service = split_path[1]
@@ -96,14 +71,6 @@ def parse_inference_info(status_code, write_type):
                 else:
                     inference[service] = [{"exec_type": split_path[0], "status_code": status_code, "count": sum_requests}]
                 exec_count+=sum_requests
-
-    if create_count != 0:
-        with open(f'{OUTPUT_PATH}/created_apps_metrics.csv', write_type, newline='') as cfile:
-            writer = csv.writer(cfile)
-            if write_type == "w": writer.writerow(["application_count", "status_code", "start_metric_date", "end_metric_date"])
-            writer.writerow([create_count, status_code, START_DATE, END_DATE])
-
-            cfile.close()
 
     if exec_count != 0:
        with open(f'{OUTPUT_PATH}/total_inference_metrics.csv', write_type, newline='') as efile:
@@ -125,7 +92,7 @@ def parse_inference_info(status_code, write_type):
 def parse_create_info(write_type):
     with open(args.file_path, 'r') as rawfile:
         for log in rawfile:
-            match = re.match(CREATE_LOGS_RE, log)
+            match = re.match(r'\[CREATE-HANDLER\] (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) (\w+) \| (\d{3}) \| (\/\S+) \| ([\w-]+) \| ([\w\d]+@[a-zA-Z]+\.[a-zA-Z]+)', log)
             if match:
                 creation_time = match.group(1)
                 service_name = match.group(5)
@@ -135,3 +102,24 @@ def parse_create_info(write_type):
                 writer.writerow([service_name, owner_uid, creation_time])
                 cfile.close()
         rawfile.close()
+
+wr="w"
+if args.use_existing:
+    wr="a"
+
+if args.create:
+    parse_create_info(wr)
+else:
+    with open(args.file_path, 'r') as rawfile:
+        metrics = json.loads(rawfile.read())
+        try:
+            START_DATE = metrics["general"]["start_date"]
+            END_DATE = metrics["general"]["end_date"]
+        except:
+            START_DATE = metrics["general"]["date_time"]
+            END_DATE = metrics["general"]["date_time"]
+
+if args.general:
+    parse_geolocation_info(wr)
+if args.partial:
+    parse_inference_info(args.status_code, wr)
