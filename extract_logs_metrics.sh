@@ -7,16 +7,21 @@ CLUSTER_LOGS_DIR="/var/log/clusterlogs"
 LOCAL_LOGS_DIR="/var/log/ingresslogs"
 OSCAR_LOGS_DIR="$LOCAL_LOGS_DIR/oscar"
 
-HISTORY_LOGS="$OSCAR_LOGS_DIR/oscar.log"
-LATEST_LOGS="$OSCAR_LOGS_DIR/latest_oscar.log"
-mkdir -p $OSCAR_LOGS_DIR
+HISTORY_LOGS_INFERENCE="$OSCAR_LOGS_DIR/inference/oscar.log"
+LATEST_LOGS_INFERENCE="$OSCAR_LOGS_DIR/inference/latest_oscar.log"
+
+HISTORY_LOGS_CREATE="$OSCAR_LOGS_DIR/create/oscar.log"
+LATEST_LOGS_CREATE="$OSCAR_LOGS_DIR/create/latest_oscar.log"
+mkdir -p $OSCAR_LOGS_DIR/inference
+mkdir -p $OSCAR_LOGS_DIR/create
 
 # Log format for goaccess
 LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Ts | %h | %m %~ %U | %u'
 
 addLog(){
     ingress_logfile=$1
-    cat $ingress_logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $HISTORY_LOGS >/dev/null
+    cat $ingress_logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $HISTORY_LOGS_INFERENCE >/dev/null
+    cat $logfile | grep CREATE-HANDLER | grep '/system/services' | tee -a $HISTORY_LOGS_INFERENCE >/dev/null
 }
 
 metrics(){
@@ -24,9 +29,9 @@ metrics(){
     filename=`basename "$LOG_FILE"`
     geo_err=$( { goaccess "${LOG_FILE}" --log-format="${LOG_FORMAT}" -o "${OUTPUTS_PATH}/${filename}_full.json" --json-pretty-print; } 2>&1 )
     if [[ $filename == "latest"* ]]; then
-        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0
+        python3 logs_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0
     else
-        python3 goaccess_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0 -u
+        python3 logs_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0 -u
     fi
     
     status_codes=('200' '204' '404' '500')
@@ -42,10 +47,10 @@ metrics(){
             echo "[*] Warning: Couldn't process file $LOG_FILE for status code '$code'"
         else
             if [ $init == 't' ]; then
-                python3 goaccess_metric_parser.py -f "${out}_f${code}.json" -p $code
+                python3 logs_metric_parser.py -f "${out}_f${code}.json" -p $code
                 init="f"
             else
-            python3 goaccess_metric_parser.py -f "${out}_f${code}.json" -p $code -u
+            python3 logs_metric_parser.py -f "${out}_f${code}.json" -p $code -u
             fi
         fi
     fi
@@ -76,8 +81,9 @@ for logfile in "$LOCAL_LOGS_DIR/$relative_log_path/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
-            cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS >/dev/null
-            metrics $LATEST_LOGS
+            cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS_INFERENCE >/dev/null
+            cat $logfile | grep CREATE-HANDLER | grep '/system/services' | tee -a $LATEST_LOGS_CREATE >/dev/null
+            metrics $LATEST_LOGS_INFERENCE
         else
             addLog $logfile
         fi
@@ -85,11 +91,16 @@ do
 done
 
 # Generate the html file
-if [ ! -f "${HISTORY_LOGS}" ] || [ ! -s "${HISTORY_LOGS}" ]; then
-    goaccess "${LATEST_LOGS}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
+if [ ! -f "${HISTORY_LOGS_INFERENCE}" ] || [ ! -s "${HISTORY_LOGS_INFERENCE}" ]; then
+    goaccess "${LATEST_LOGS_INFERENCE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
 else
-    metrics $HISTORY_LOGS
+    metrics $HISTORY_LOGS_INFERENCE
 
-    cat $LATEST_LOGS | tee -a $HISTORY_LOGS >/dev/null
-    goaccess "${HISTORY_LOGS}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
+    cat $LATEST_LOGS_INFERENCE | tee -a $HISTORY_LOGS_INFERENCE >/dev/null
+    goaccess "${HISTORY_LOGS_INFERENCE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
 fi
+
+if [ ! -f "${HISTORY_LOGS_CREATE}" ] || [ ! -s "${HISTORY_LOGS_CREATE}" ]; then
+    python3 logs_metric_parser.py -f $LATEST_LOGS_CREATE -c
+else
+    python3 logs_metric_parser.py -f $HISTORY_LOGS_CREATE -c -u

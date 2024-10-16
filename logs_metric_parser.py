@@ -5,6 +5,7 @@ import csv
 import json
 import time
 import os
+import re
 
 CREATE_PATH = "/system/services"
 RUN_PATH = "/run"
@@ -13,26 +14,39 @@ JOB_PATH = "/job"
 TIMESTAMP = str(int(time.time()))
 
 OUTPUT_PATH = "/app/metrics/goaccess-metrics"
+CREATE_LOGS_RE = "r'\[CREATE-HANDLER\] (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) (\w+) \| (\d{3}) \| (\/\S+) \| ([\w-]+) \| ([\w\d]+@[a-zA-Z]+\.[a-zA-Z]+)'"
 
 parser = argparse.ArgumentParser(description="Command-line to retreive Prometheus metrics from OSCAR", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-f", "--file_path", type=str, help="Logfile path/name")
 parser.add_argument("-g", "--general", action="store_true", help="Complete logfile")
 parser.add_argument("-u", "--use_existing", action="store_true", required=False, help="Use existing output file")
 parser.add_argument("-p", "--partial", action="store_true", help="Filtered by status code logfile")
+parser.add_argument("-c", "--create", action="store_true", help="Using as input created services log format file")
 parser.add_argument("status_code", type=int, help="Complete logfile")
 
 
 args = parser.parse_args()
 
-with open(args.file_path, 'r') as rawfile:
-    metrics = json.loads(rawfile.read())
-    try:
-        START_DATE = metrics["general"]["start_date"]
-        END_DATE = metrics["general"]["end_date"]
-    except:
-        START_DATE = metrics["general"]["date_time"]
-        END_DATE = metrics["general"]["date_time"]
+wr="w"
+if args.use_existing:
+    wr="a"
 
+if args.create:
+    parse_create_info(wr)
+else:
+    with open(args.file_path, 'r') as rawfile:
+        metrics = json.loads(rawfile.read())
+        try:
+            START_DATE = metrics["general"]["start_date"]
+            END_DATE = metrics["general"]["end_date"]
+        except:
+            START_DATE = metrics["general"]["date_time"]
+            END_DATE = metrics["general"]["date_time"]
+
+if args.general:
+    parse_geolocation_info(wr)
+if args.partial:
+    parse_inference_info(args.status_code, wr)
 
 """
  > Countries reached 
@@ -61,7 +75,7 @@ def parse_geolocation_info(write_type):
  > Output format: {service, executions, type, successfull, failed, start_date, end_date}
 """
 
-def parse_requests_info(status_code, write_type):
+def parse_inference_info(status_code, write_type):
 
     inference = dict()
     requests = metrics["requests"]["data"]
@@ -108,12 +122,16 @@ def parse_requests_info(status_code, write_type):
                 
             sfile.close()        
 
-
-wr="w"
-if args.use_existing:
-    wr="a"
-
-if args.general:
-    parse_geolocation_info(wr)
-if args.partial:
-    parse_requests_info(args.status_code, wr)
+def parse_create_info(write_type):
+    with open(args.file_path, 'r') as rawfile:
+        for log in rawfile:
+            match = re.match(CREATE_LOGS_RE, log)
+            if match:
+                creation_time = match.group(1)
+                service_name = match.group(5)
+                owner_uid = match.group(6)
+            with open(f'{OUTPUT_PATH}/created_services_info.csv', write_type, newline='') as cfile:
+                if write_type == "w": writer.writerow(["service_name", "owner_uid", "creation_time"])
+                writer.writerow([service_name, owner_uid, creation_time])
+                cfile.close()
+        rawfile.close()
