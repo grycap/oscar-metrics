@@ -26,13 +26,7 @@ parser.add_argument("status_code", type=int, help="Complete logfile")
 
 args = parser.parse_args()
 
-wr="w"
-if args.use_existing:
-    wr="a"
-
-if args.create:
-    parse_create_info(wr)
-else:
+if not args.create:
     with open(args.file_path, 'r') as rawfile:
         metrics = json.loads(rawfile.read())
         try:
@@ -93,32 +87,43 @@ def parse_inference_info(status_code, write_type):
             writer = csv.writer(efile)
             if write_type == "w": writer.writerow(["inference_count", "status_code", "start_metric_date", "end_metric_date"])
             writer.writerow([exec_count, status_code, START_DATE, END_DATE])
-            
-            efile.close()
 
        with open(f'{OUTPUT_PATH}/services_inference_metrics.csv', write_type, newline='') as sfile:
             writer = csv.writer(sfile)
             if write_type == "w": writer.writerow(["service_name", "exec_type", "status_code", "inference_count" , "start_metric_date", "end_metric_date"])
             for k in inference.keys():
                 for item in inference[k]:
-                    writer.writerow([k, item["exec_type"], item["status_code"], item["count"], START_DATE, END_DATE])
-                
-            sfile.close()        
+                    writer.writerow([k, item["exec_type"], item["status_code"], item["count"], START_DATE, END_DATE])       
 
 def parse_create_info(write_type):
-    with open(args.file_path, 'r') as rawfile:
-        for log in rawfile:
-            match = re.match(r'\[CREATE-HANDLER\] (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) (\w+) \| (\d{3}) \| (\/\S+) \| ([\w-]+) \| ([\w\d]+@[a-zA-Z]+\.[a-zA-Z]+)', log)
-            if match:
-                creation_time = match.group(1)
-                service_name = match.group(5)
-                owner_uid = match.group(6)
-            with open(f'{OUTPUT_PATH}/created_services_info.csv', write_type, newline='') as cfile:
-                if write_type == "w": writer.writerow(["service_name", "owner_uid", "creation_time"])
-                writer.writerow([service_name, owner_uid, creation_time])
-                cfile.close()
-        rawfile.close()
+    with open(f'{OUTPUT_PATH}/created_services_info.csv', write_type, newline='') as cfile:
+        writer = csv.writer(cfile)
+        if write_type == "w": writer.writerow(["service_name", "owner_uid", "creation_time"])
+        with open(args.file_path, 'r') as rawfile:
+            for log in rawfile:
+                pattern = re.compile(
+                    r'\[CREATE-HANDLER\]\s'  # Skip the first part
+                    r'(?P<date>\d{4}/\d{2}/\d{2})\s'  # Date (e.g., 2024/10/16)
+                    r'(?P<time>\d{2}:\d{2}:\d{2})\s'  # Time (e.g., 10:41:49)
+                    r'(?P<method>\w+)\s\|\s'  # HTTP method (e.g., POST)
+                    r'(?P<status>\d{3})\s\|\s'  # Status code (e.g., 200)
+                    r'(?P<path>\S+)\s\|\s'  # Request path (e.g., /system/services)
+                    r'(?P<service_name>\S+)\s\|\s'  # Service name (e.g., cowsay-fsdg9)
+                    r'(?P<user>\S+)'  # User identifier (e.g., <uid>@egi.eu)
+                )
+                match = pattern.search(log)
+                if match:
+                    creation_time = match.group(date)
+                    service_name = match.group(service_name)
+                    owner_uid = match.group(user)
+                    writer.writerow([service_name, owner_uid, creation_time])
 
+wr="w"
+if args.use_existing:
+    wr="a"
+
+if args.create:
+    parse_create_info(wr)
 if args.general:
     parse_geolocation_info(wr)
 if args.partial:
