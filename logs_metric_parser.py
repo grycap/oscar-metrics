@@ -27,7 +27,7 @@ parser.add_argument("status_code", type=int, help="Complete logfile")
 
 args = parser.parse_args()
 
-if not args.create:
+if not args.create and not args.inference:
     with open(args.file_path, 'r') as rawfile:
         metrics = json.loads(rawfile.read())
         try:
@@ -83,19 +83,19 @@ def parse_inference_goaccess(status_code, write_type):
 """
 def parse_inference_log(write_type):
     with open(f'{OUTPUT_PATH}/services_inference_metrics.csv', write_type, newline='') as sfile:
-        writer = csv.writer(cfile)
-        if write_type == "w": write.writerow(["service_name", "exec_type", "status_code", "owner_uid", "request_date", "request_time"])
+        writer = csv.writer(sfile)
+        if write_type == "w": writer.writerow(["service_name", "exec_type", "status_code", "owner_uid", "request_date", "request_time"])
         with open(args.file_path, 'r') as rawfile:
             for log in rawfile:
                 pattern = re.compile(
                     r'\[GIN-EXECUTIONS-LOGGER\]\s'  # Literal text "[GIN-EXECUTIONS-LOGGER]"
-                    r'(?P<date>\d{4}/\d{2}/\d{2})\s-\s(?P<time>\d{2}:\d{2}:\d{2})\s\|\s'  # Date and time
-                    r'(?P<status>\d{3})\s\|\s'  # HTTP status code
-                    r'(?P<latency>[\d.]+s)\s\|\s'  # Latency (time taken)
-                    r'(?P<client_ip>\d{1,3}(?:\.\d{1,3}){3})\s\|\s'  # Client IP
-                    r'(?P<method>[A-Z]+)\s+\|\s'  # HTTP method (e.g., POST)
-                    r'(?P<path>\S+)\s\|\s'  # Request path
-                    r'(?P<user>\S+)'  # User (e.g., <uid>@egi.eu)
+                    r'(?P<date>\d{4}/\d{2}/\d{2})\s-\s(?P<time>\d{2}:\d{2}:\d{2})\s\|\s+'  # Date and time
+                    r'(?P<status>\d{3})\s+\|\s+'  # HTTP status code
+                    r'(?P<latency>\S+)\s+\|\s+'  # Latency (can be in ms or s)
+                    r'(?P<client_ip>\S+)\s+\|\s+'  # Client IP
+                    r'(?P<method>[A-Z]+)\s+'  # HTTP method (e.g., POST)
+                    r'(?P<path>\S+)\s+\|\s+'  # Request path
+                    r'(?P<user>\S*)'  # User (can be empty)
                 )
                 match = pattern.search(log)
                 if match:
