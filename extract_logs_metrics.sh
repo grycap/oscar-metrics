@@ -47,10 +47,10 @@ metrics(){
             echo "[*] Warning: Couldn't process file $LOG_FILE for status code '$code'"
         else
             if [ $init == 't' ]; then
-                python3 logs_metric_parser.py -f "${out}_f${code}.json" -p $code
+                python3 logs_metric_parser.py -f "${out}_f${code}.json" -a $code
                 init="f"
             else
-            python3 logs_metric_parser.py -f "${out}_f${code}.json" -p $code -u
+            python3 logs_metric_parser.py -f "${out}_f${code}.json" -a $code -u
             fi
         fi
     fi
@@ -93,14 +93,18 @@ done
 # Generate the html file
 if [ ! -f "${HISTORY_LOGS_INFERENCE}" ] || [ ! -s "${HISTORY_LOGS_INFERENCE}" ]; then
     goaccess "${LATEST_LOGS_INFERENCE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
+    python3 logs_metric_parser.py -f $LATEST_LOGS_INFERENCE -i 0
 else
     metrics $HISTORY_LOGS_INFERENCE
 
     cat $LATEST_LOGS_INFERENCE | tee -a $HISTORY_LOGS_INFERENCE >/dev/null
+    python3 logs_metric_parser.py -f $HISTORY_LOGS_INFERENCE -i 0 -u
     goaccess "${HISTORY_LOGS_INFERENCE}" --log-format="${LOG_FORMAT}" -o "/app/metrics/dashboard.html"
+
 fi
 
 if [ ! -f "${HISTORY_LOGS_CREATE}" ] || [ ! -s "${HISTORY_LOGS_CREATE}" ]; then
-    python3 logs_metric_parser.py -f $LATEST_LOGS_CREATE -c
+    python3 logs_metric_parser.py -f $LATEST_LOGS_CREATE -c 0
 else
-    python3 logs_metric_parser.py -f $HISTORY_LOGS_CREATE -c -u
+    python3 logs_metric_parser.py -f $HISTORY_LOGS_CREATE -c 0 -u
+fi
