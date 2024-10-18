@@ -81,8 +81,8 @@ def generate_html(out_file, dir_path, out_url=''):
             icon = get_icon(file_name)
             if "dashboard" in file_name:
                 file_name = "GoAccess Dashboard"
-            if "goaccess-metrics" in file_name:
-                file_name = "GoAccess Metrics"
+            if "logs-metrics" in file_name:
+                file_name = "Logs Metrics"
             if "prometheus-metrics" in file_name:
                 file_name = "Prometheus Metrics" 
             file_entry = html_file_entry_template.format(url=file_url, id=i, icon=icon, filename=file_name)
