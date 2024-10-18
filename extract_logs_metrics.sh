@@ -34,15 +34,15 @@ metrics(){
         python3 logs_metric_parser.py -f "${OUTPUTS_PATH}/${filename}_full.json" -g 0 -u
     fi
     
-    status_codes=('200' '204' '404' '500')
+    status_codes=('200' '201' '204' '404' '500')
     init="t"
 
     out="${FILTERED_PATH}/${filename}"
 
     for code in "${status_codes[@]}"; do
-    code_logs=$(cat $LOG_FILE| grep -e 'HTTP/[0-9].[0-9]" '${code}' ')
+    code_logs=$(cat $LOG_FILE| grep -E '\|[ ]*'${code}'[ ]*\|')
     if [ ! -z "$code_logs" ]; then
-        app_err=$( { cat $LOG_FILE | grep -e 'HTTP/[0-9].[0-9]" '${code}' ' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}"; } 2>&1 )
+        app_err=$( { cat $LOG_FILE | grep -E '\|[ ]*'${code}'[ ]*\|' | goaccess - -o  "${out}_f${code}.json" --json-pretty-print --log-format="${LOG_FORMAT}"; } 2>&1 )
         if [ ! -f "${out}_f${code}.json" ]; then
             echo "[*] Warning: Couldn't process file $LOG_FILE for status code '$code'"
         else
@@ -57,13 +57,16 @@ metrics(){
     done
 }
 
+# Download from s3 all past logs from previous OSCAR pods
+aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_DIR --recursive  --exclude "*.log" --exclude "*.gz" --exclude "oscar/*"
+
 for log_path in "$CLUSTER_LOGS_DIR"/*;
 do
     if [[ $log_path == *"oscar_oscar"* ]]; then
         cp -r $log_path $LOCAL_LOGS_DIR
-        # remove total path
+        # Remove total path
         relative_log_path=$(echo $log_path | sed 's/\/var\/log\/clusterlogs\///')
-        # upload a backup of the logs to s3
+        # Upload current logs to s3
         aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${log_relative_path}"
         for logfile in "$LOCAL_LOGS_DIR/$log_relative_path/oscar/"*;
         do
@@ -77,7 +80,7 @@ do
 done
 
 # /var/log/ingresslogs/oscar_oscar-7499cd/oscar
-for logfile in "$LOCAL_LOGS_DIR/$relative_log_path/oscar/"*;
+for logfile in "$LOCAL_LOGS_DIR/oscar_oscar"*"/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
