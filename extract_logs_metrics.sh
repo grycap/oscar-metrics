@@ -58,7 +58,7 @@ metrics(){
 }
 
 # Download from s3 all past logs from previous OSCAR pods
-aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_DIR --recursive  --exclude "*.log" --exclude "*.gz" --exclude "oscar/*"
+aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_DIR --recursive --exclude "oscar/*"
 
 for log_path in "$CLUSTER_LOGS_DIR"/*;
 do
