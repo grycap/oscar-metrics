@@ -67,8 +67,8 @@ do
         # Remove total path
         relative_log_path=$(echo $log_path | sed 's/\/var\/log\/clusterlogs\///')
         # Upload current logs to s3
-        aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${log_relative_path}"
-        for logfile in "$LOCAL_LOGS_DIR/$log_relative_path/oscar/"*;
+        aws s3 cp --recursive $log_path s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs/"${relative_log_path}"
+        for logfile in "$LOCAL_LOGS_DIR/$relative_log_path/oscar/"*;
         do
             if [[ $logfile == *".gz" ]]; then
                 # unzip all log files
