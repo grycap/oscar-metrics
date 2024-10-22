@@ -57,8 +57,7 @@ metrics(){
     done
 }
 
-# Download from s3 all past logs from previous OSCAR pods
-aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_DIR --recursive --exclude "oscar/*"
+
 
 for log_path in "$CLUSTER_LOGS_DIR"/*;
 do
@@ -79,15 +78,20 @@ do
     fi
 done
 
+# Download from s3 all past logs from previous OSCAR pods
+aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_DIR --recursive --exclude "oscar/*" --exclude "${relative_log_path}"
+
 # /var/log/ingresslogs/oscar_oscar-7499cd/oscar
 for logfile in "$LOCAL_LOGS_DIR/oscar_oscar"*"/oscar/"*;
 do
     if [[ $logfile == *".log"* ]]; then
         if [[ $logfile == *".log" ]]; then
+            echo ">> Filtering last logfile '$logfile'"
             cat $logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $LATEST_LOGS_INFERENCE >/dev/null
             cat $logfile | grep CREATE-HANDLER | grep '/system/services' | tee -a $LATEST_LOGS_CREATE >/dev/null
             metrics $LATEST_LOGS_INFERENCE
         else
+            echo ">> Adding log '$logfile'"
             addLog $logfile
         fi
     fi
