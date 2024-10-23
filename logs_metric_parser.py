@@ -84,7 +84,7 @@ def parse_inference_goaccess(status_code, write_type):
 def parse_inference_log(write_type):
     with open(f'{OUTPUT_PATH}/services_inference_metrics.csv', write_type, newline='') as sfile:
         writer = csv.writer(sfile)
-        if write_type == "w": writer.writerow(["service_name", "exec_type", "status_code", "owner_uid", "request_date", "request_time"])
+        if write_type == "w": writer.writerow(["service_name", "exec_type", "status_code", "owner_uid", "request_datetime"])
         with open(args.file_path, 'r') as rawfile:
             for log in rawfile:
                 pattern = re.compile(
@@ -107,8 +107,10 @@ def parse_inference_log(write_type):
                     status_code = match.group('status')
                     request_date = match.group('date')
                     request_time = match.group('time')
+
+                    request_datetime = request_date+" "+"request_time"
                     owner_uid = match.group('user')
-                    writer.writerow([service_name, exec_type, status_code, owner_uid, request_date, request_time]) 
+                    writer.writerow([service_name, exec_type, status_code, owner_uid, request_datetime]) 
 
 """
  > Number of AI applications (created services -> POST requests to /system/services)
@@ -117,7 +119,7 @@ def parse_inference_log(write_type):
 def parse_create_log(write_type):
     with open(f'{OUTPUT_PATH}/created_services_info.csv', write_type, newline='') as cfile:
         writer = csv.writer(cfile)
-        if write_type == "w": writer.writerow(["service_name", "owner_uid", "creation_date", "creation_time"])
+        if write_type == "w": writer.writerow(["service_name", "owner_uid", "creation_datetime"])
         with open(args.file_path, 'r') as rawfile:
             for log in rawfile:
                 pattern = re.compile(
@@ -134,9 +136,11 @@ def parse_create_log(write_type):
                 if match:
                     creation_date = match.group('date')
                     creation_time = match.group('time')
+                    creation_datetime = creation_date+" "+"creation_time"
+
                     service_name = match.group('service_name')
                     owner_uid = match.group('user')
-                    writer.writerow([service_name, owner_uid, creation_date, creation_time])
+                    writer.writerow([service_name, owner_uid, creation_date, creation_datetime])
 
 wr="w"
 if args.use_existing:
