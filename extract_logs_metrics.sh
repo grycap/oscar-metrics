@@ -19,7 +19,7 @@ LOG_FORMAT='%^ %^ %^ %^ [%^] %d - %t | %s | %Ts | %h | %m %~ %U | %u'
 addLog(){
     ingress_logfile=$1
     cat $ingress_logfile | grep GIN-EXECUTIONS-LOGGER | grep -a '/job\|/run' | tee -a $HISTORY_LOGS_INFERENCE >/dev/null
-    cat $logfile | grep CREATE-HANDLER | grep '/system/services' | tee -a $HISTORY_LOGS_CREATE >/dev/null
+    cat $ingress_logfile | grep CREATE-HANDLER | grep '/system/services' | tee -a $HISTORY_LOGS_CREATE >/dev/null
 }
 
 metrics(){
@@ -71,7 +71,7 @@ aws s3 cp s3://metrics.oscar.grycap.net/"${CLUSTER_ID}"/ingresslogs $LOCAL_LOGS_
 # /var/log/ingresslogs/oscar_oscar-7499cd/oscar
 for logfile in "$LOCAL_LOGS_DIR/oscar_oscar"*"/oscar/"*;
 do
-    if [[ $logfile == *".gz" &&  ]]; then
+    if [[ $logfile == *".gz" ]]; then
         # unzip all log files
         gzip -d $logfile
         logfile=$(echo $logfile | sed 's/\.gz//')
