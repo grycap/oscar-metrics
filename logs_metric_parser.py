@@ -108,7 +108,7 @@ def parse_inference_log(write_type):
                     request_date = match.group('date')
                     request_time = match.group('time')
 
-                    request_datetime = request_date+" "+"request_time"
+                    request_datetime = request_date+" "+request_time
                     owner_uid = match.group('user')
                     writer.writerow([service_name, exec_type, status_code, owner_uid, request_datetime]) 
 
@@ -136,7 +136,7 @@ def parse_create_log(write_type):
                 if match:
                     creation_date = match.group('date')
                     creation_time = match.group('time')
-                    creation_datetime = creation_date+" "+"creation_time"
+                    creation_datetime = creation_date+" "+creation_time
 
                     service_name = match.group('service_name')
                     owner_uid = match.group('user')
