@@ -26,17 +26,17 @@ RUN pip3 install -r /tmp/requirements.txt
 
 # Create the directory structure for the metrics
 RUN mkdir -p /app/metrics/rawmetrics/filtered_by_status_code && \
-    mkdir -p /app/metrics/goaccess-metrics && \
+    mkdir -p /app/metrics/logs-metrics && \
     mkdir -p /app/metrics/prometheus-metrics && \
     mkdir -p /app/ui && \
     mkdir -p /var/log/ingresslogs
 
 # Copy required files
-COPY extract_goaccess_metrics.sh /app/
-COPY goaccess_metric_parser.py /app/
+COPY extract_logs_metrics.sh /app/
+COPY logs_metric_parser.py /app/
 
 COPY extract_prometheus_metrics.sh /app/
-COPY metrics_prom.py /app/
+COPY prometheus_metric_parser.py /app/
 
 COPY create_index.py /app/
 
